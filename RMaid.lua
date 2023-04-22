@@ -1,7 +1,7 @@
 local Maid = {}
 Maid.ClassName = "Maid"
 
-function Maid.new()
+function Maid.new(MINERVA)
 	local proxy = setmetatable({
 		_tasks = {}
 	}, Maid)
@@ -51,7 +51,7 @@ local function threadDebug(task,ok,...)
 		print(debug.traceback(
 			task,
 			"ERROR: "..tostring((...))
-		))
+			))
 	end
 end
 function Maid:GiveTask(task)
@@ -65,28 +65,13 @@ function Maid:GiveTask(task)
 	if type(task) == "table" and (not task.Destroy) then
 		warn("[Maid.GiveTask] - Gave table task without .Destroy")
 	end
-	
+
 	if typeof(task) == 'thread' then
 		threadDebug(task,coroutine.resume(task))
 	end
 
 	return taskId
 end
-
---[[function Maid:GivePromise(promise)
-	if not promise:IsPending() then
-		return promise
-	end
-
-	local newPromise = promise.resolved(promise)
-	local id = self:GiveTask(newPromise)
-
-	newPromise:Finally(function()
-		self[id] = nil
-	end)
-
-	return newPromise
-end]]
 
 function Maid:DoCleaning()
 	local tasks = self._tasks
